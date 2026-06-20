@@ -26,7 +26,7 @@ export default async function DashboardLayout({
     title: string;
     template: string;
     Starmark?: Array<{ isMarked: boolean }>;
-  })=>({
+  }) => ({
     id:item.id,
     name:item.title,
     starred:item.Starmark?.[0]?.isMarked || false,

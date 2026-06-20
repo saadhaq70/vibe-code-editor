@@ -194,10 +194,8 @@ const MainPlaygroundPage = () => {
       try {
         console.log(`📝 Applying ${modifications.length} modifications...`);
 
-        // Clone the template data
         const updatedTemplateData = JSON.parse(JSON.stringify(templateData)) as TemplateFolder;
 
-        // Helper function to find and update a file in the template structure
         const updateFileInStructure = (
           items: (TemplateFile | TemplateFolder)[],
           targetPath: string,
@@ -207,12 +205,10 @@ const MainPlaygroundPage = () => {
             const item = items[i];
 
             if ("folderName" in item) {
-              // It's a folder, recurse
               if (updateFileInStructure(item.items, targetPath, newContent)) {
                 return true;
               }
             } else {
-              // It's a file, check if it matches
               const itemPath = `${item.filename}.${item.fileExtension}`;
               
               if (targetPath.endsWith(itemPath) || targetPath === itemPath) {
