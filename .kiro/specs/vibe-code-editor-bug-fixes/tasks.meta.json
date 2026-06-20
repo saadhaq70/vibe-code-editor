@@ -1,0 +1,243 @@
+{
+  "pbtResults": {
+    "1. Write bug condition exploration test for type safety suppressions": {
+      "status": "passed",
+      "failingExample": "Bug confirmed: Found 162 type safety issues when @ts-ignore suppressions were removed.\n\n**Key Type Errors in auth.ts:**\n\n1. **Nested accounts.create (line 28):**\n   - `Type 'JsonValue' is not assignable to type 'string'`\n   - `Type 'number' is not assignable to type 'string'`\n   - This occurs because Prisma Account model optional fields (sessionState, refreshToken, etc.) expect `string | null` but the OAuth account object provides `string | undefined | number`\n\n2. **sessionState field (line 66):**\n   - `Type 'JsonValue' is not assignable to type 'string'`\n   - `Type 'number' is not assignable to type 'string'`\n   - Same issue - the sessionState field from OAuth account is JsonValue but Prisma expects string | null\n\n3. **Additional finding in JWT callback (line 108):**\n   - `Property 'role' does not exist on type 'AdapterUser & User'`\n   - The User model from Prisma doesn't have role in the type definition (though it may exist at runtime)\n\n**Test Output:** Both test cases passed (compilation failed as expected), confirming that @ts-ignore suppressions are hiding real type mismatches. The fix needs to handle optional field types properly using nullish coalescing or type assertions.",
+      "lastRunTimestamp": 1781925209401
+    }
+  },
+  "executionHistory": {
+    "1. Write bug condition exploration test for type safety suppressions": [
+      {
+        "executionId": "b1323451-9822-4266-af4f-4c49b16ce6b2",
+        "chatSessionId": "sess_786eb06b-4d6e-49d3-b44a-468decbe5ef1",
+        "timestamp": 1781923787165
+      },
+      {
+        "executionId": "b1323451-9822-4266-af4f-4c49b16ce6b2",
+        "chatSessionId": "sess_786eb06b-4d6e-49d3-b44a-468decbe5ef1",
+        "timestamp": 1781923799535
+      },
+      {
+        "executionId": "b1323451-9822-4266-af4f-4c49b16ce6b2",
+        "chatSessionId": "sess_786eb06b-4d6e-49d3-b44a-468decbe5ef1",
+        "timestamp": 1781925224335
+      }
+    ],
+    "2. Write preservation property tests for authentication flow (BEFORE implementing fix)": [
+      {
+        "executionId": "b1323451-9822-4266-af4f-4c49b16ce6b2",
+        "chatSessionId": "sess_786eb06b-4d6e-49d3-b44a-468decbe5ef1",
+        "timestamp": 1781923787201
+      },
+      {
+        "executionId": "b1323451-9822-4266-af4f-4c49b16ce6b2",
+        "chatSessionId": "sess_786eb06b-4d6e-49d3-b44a-468decbe5ef1",
+        "timestamp": 1781925236021
+      }
+    ],
+    "3.1 Remove @ts-ignore and implement proper type handling": [
+      {
+        "executionId": "b1323451-9822-4266-af4f-4c49b16ce6b2",
+        "chatSessionId": "sess_786eb06b-4d6e-49d3-b44a-468decbe5ef1",
+        "timestamp": 1781923787232
+      }
+    ],
+    "3.2 Verify bug condition exploration test now passes": [
+      {
+        "executionId": "b1323451-9822-4266-af4f-4c49b16ce6b2",
+        "chatSessionId": "sess_786eb06b-4d6e-49d3-b44a-468decbe5ef1",
+        "timestamp": 1781923787267
+      }
+    ],
+    "3.3 Verify preservation tests still pass": [
+      {
+        "executionId": "b1323451-9822-4266-af4f-4c49b16ce6b2",
+        "chatSessionId": "sess_786eb06b-4d6e-49d3-b44a-468decbe5ef1",
+        "timestamp": 1781923787302
+      }
+    ],
+    "4. Write bug condition exploration test for unused import": [
+      {
+        "executionId": "b1323451-9822-4266-af4f-4c49b16ce6b2",
+        "chatSessionId": "sess_786eb06b-4d6e-49d3-b44a-468decbe5ef1",
+        "timestamp": 1781923787342
+      }
+    ],
+    "5. Write preservation property tests for chat API (BEFORE implementing fix)": [
+      {
+        "executionId": "b1323451-9822-4266-af4f-4c49b16ce6b2",
+        "chatSessionId": "sess_786eb06b-4d6e-49d3-b44a-468decbe5ef1",
+        "timestamp": 1781923787373
+      }
+    ],
+    "6.1 Remove unused import statement": [
+      {
+        "executionId": "b1323451-9822-4266-af4f-4c49b16ce6b2",
+        "chatSessionId": "sess_786eb06b-4d6e-49d3-b44a-468decbe5ef1",
+        "timestamp": 1781923787418
+      }
+    ],
+    "6.2 Verify bug condition exploration test now passes": [
+      {
+        "executionId": "b1323451-9822-4266-af4f-4c49b16ce6b2",
+        "chatSessionId": "sess_786eb06b-4d6e-49d3-b44a-468decbe5ef1",
+        "timestamp": 1781923787452
+      }
+    ],
+    "6.3 Verify preservation tests still pass": [
+      {
+        "executionId": "b1323451-9822-4266-af4f-4c49b16ce6b2",
+        "chatSessionId": "sess_786eb06b-4d6e-49d3-b44a-468decbe5ef1",
+        "timestamp": 1781923787488
+      }
+    ],
+    "7. Write bug condition exploration test for dashboard error handling": [
+      {
+        "executionId": "b1323451-9822-4266-af4f-4c49b16ce6b2",
+        "chatSessionId": "sess_786eb06b-4d6e-49d3-b44a-468decbe5ef1",
+        "timestamp": 1781923787520
+      }
+    ],
+    "8. Write preservation property tests for dashboard operations (BEFORE implementing fix)": [
+      {
+        "executionId": "b1323451-9822-4266-af4f-4c49b16ce6b2",
+        "chatSessionId": "sess_786eb06b-4d6e-49d3-b44a-468decbe5ef1",
+        "timestamp": 1781923787551
+      }
+    ],
+    "9.1 Replace silent error handling with explicit throws": [
+      {
+        "executionId": "b1323451-9822-4266-af4f-4c49b16ce6b2",
+        "chatSessionId": "sess_786eb06b-4d6e-49d3-b44a-468decbe5ef1",
+        "timestamp": 1781923787584
+      }
+    ],
+    "9.2 Verify bug condition exploration test now passes": [
+      {
+        "executionId": "b1323451-9822-4266-af4f-4c49b16ce6b2",
+        "chatSessionId": "sess_786eb06b-4d6e-49d3-b44a-468decbe5ef1",
+        "timestamp": 1781923787617
+      }
+    ],
+    "9.3 Verify preservation tests still pass": [
+      {
+        "executionId": "b1323451-9822-4266-af4f-4c49b16ce6b2",
+        "chatSessionId": "sess_786eb06b-4d6e-49d3-b44a-468decbe5ef1",
+        "timestamp": 1781923787693
+      }
+    ],
+    "10. Write bug condition exploration test for playground error handling": [
+      {
+        "executionId": "b1323451-9822-4266-af4f-4c49b16ce6b2",
+        "chatSessionId": "sess_786eb06b-4d6e-49d3-b44a-468decbe5ef1",
+        "timestamp": 1781923787722
+      }
+    ],
+    "11. Write preservation property tests for playground operations (BEFORE implementing fix)": [
+      {
+        "executionId": "b1323451-9822-4266-af4f-4c49b16ce6b2",
+        "chatSessionId": "sess_786eb06b-4d6e-49d3-b44a-468decbe5ef1",
+        "timestamp": 1781923787749
+      }
+    ],
+    "12.1 Replace silent error handling with explicit throws": [
+      {
+        "executionId": "b1323451-9822-4266-af4f-4c49b16ce6b2",
+        "chatSessionId": "sess_786eb06b-4d6e-49d3-b44a-468decbe5ef1",
+        "timestamp": 1781923787780
+      }
+    ],
+    "12.2 Verify bug condition exploration test now passes": [
+      {
+        "executionId": "b1323451-9822-4266-af4f-4c49b16ce6b2",
+        "chatSessionId": "sess_786eb06b-4d6e-49d3-b44a-468decbe5ef1",
+        "timestamp": 1781923787815
+      }
+    ],
+    "12.3 Verify preservation tests still pass": [
+      {
+        "executionId": "b1323451-9822-4266-af4f-4c49b16ce6b2",
+        "chatSessionId": "sess_786eb06b-4d6e-49d3-b44a-468decbe5ef1",
+        "timestamp": 1781923787854
+      }
+    ],
+    "13. Write bug condition exploration test for code formatting": [
+      {
+        "executionId": "b1323451-9822-4266-af4f-4c49b16ce6b2",
+        "chatSessionId": "sess_786eb06b-4d6e-49d3-b44a-468decbe5ef1",
+        "timestamp": 1781923787887
+      }
+    ],
+    "14. Write preservation property tests for template API (BEFORE implementing fix)": [
+      {
+        "executionId": "b1323451-9822-4266-af4f-4c49b16ce6b2",
+        "chatSessionId": "sess_786eb06b-4d6e-49d3-b44a-468decbe5ef1",
+        "timestamp": 1781923787918
+      }
+    ],
+    "15.1 Apply consistent formatting": [
+      {
+        "executionId": "b1323451-9822-4266-af4f-4c49b16ce6b2",
+        "chatSessionId": "sess_786eb06b-4d6e-49d3-b44a-468decbe5ef1",
+        "timestamp": 1781923787948
+      }
+    ],
+    "15.2 Verify bug condition exploration test now passes": [
+      {
+        "executionId": "b1323451-9822-4266-af4f-4c49b16ce6b2",
+        "chatSessionId": "sess_786eb06b-4d6e-49d3-b44a-468decbe5ef1",
+        "timestamp": 1781923787980
+      }
+    ],
+    "15.3 Verify preservation tests still pass": [
+      {
+        "executionId": "b1323451-9822-4266-af4f-4c49b16ce6b2",
+        "chatSessionId": "sess_786eb06b-4d6e-49d3-b44a-468decbe5ef1",
+        "timestamp": 1781923788011
+      }
+    ],
+    "16. Write bug condition exploration test for template path configuration": [
+      {
+        "executionId": "b1323451-9822-4266-af4f-4c49b16ce6b2",
+        "chatSessionId": "sess_786eb06b-4d6e-49d3-b44a-468decbe5ef1",
+        "timestamp": 1781923788047
+      }
+    ],
+    "17. Write preservation property tests for template configuration (BEFORE implementing fix)": [
+      {
+        "executionId": "b1323451-9822-4266-af4f-4c49b16ce6b2",
+        "chatSessionId": "sess_786eb06b-4d6e-49d3-b44a-468decbe5ef1",
+        "timestamp": 1781923788083
+      }
+    ],
+    "18.1 Correct the NEXTJS template path": [
+      {
+        "executionId": "b1323451-9822-4266-af4f-4c49b16ce6b2",
+        "chatSessionId": "sess_786eb06b-4d6e-49d3-b44a-468decbe5ef1",
+        "timestamp": 1781923788117
+      }
+    ],
+    "18.2 Verify bug condition exploration test now passes": [
+      {
+        "executionId": "b1323451-9822-4266-af4f-4c49b16ce6b2",
+        "chatSessionId": "sess_786eb06b-4d6e-49d3-b44a-468decbe5ef1",
+        "timestamp": 1781923788175
+      }
+    ],
+    "18.3 Verify preservation tests still pass": [
+      {
+        "executionId": "b1323451-9822-4266-af4f-4c49b16ce6b2",
+        "chatSessionId": "sess_786eb06b-4d6e-49d3-b44a-468decbe5ef1",
+        "timestamp": 1781923788205
+      }
+    ],
+    "19. Comprehensive verification - Ensure all tests pass": [
+      {
+        "executionId": "b1323451-9822-4266-af4f-4c49b16ce6b2",
+        "chatSessionId": "sess_786eb06b-4d6e-49d3-b44a-468decbe5ef1",
+        "timestamp": 1781923788251
+      }
+    ]
+  }
+}
