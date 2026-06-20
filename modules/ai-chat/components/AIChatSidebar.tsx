@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { ChatMessage, CodeChange } from "../hooks/useAIChat";
+import { ChatMessage } from "../hooks/useAIChat";
+import { FileModification } from "@/app/api/ai-modify/route";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -17,7 +18,7 @@ interface AIChatSidebarProps {
   isLoading: boolean;
   onSendMessage: (message: string) => void;
   onClearChat: () => void;
-  onApplyChange?: (change: CodeChange) => void | Promise<void>;
+  onApplyChange?: (change: FileModification) => void | Promise<void>;
 }
 
 export const AIChatSidebar = ({
@@ -65,7 +66,7 @@ export const AIChatSidebar = ({
     setTimeout(() => setCopiedCode(null), 2000);
   };
 
-  const handleApply = async (change: CodeChange, key: string) => {
+  const handleApply = async (change: FileModification, key: string) => {
     if (!onApplyChange || applyingKey) return;
     setApplyingKey(key);
     try {
@@ -234,9 +235,9 @@ export const AIChatSidebar = ({
                           className="flex items-center justify-between gap-2 rounded-md border bg-muted/30 p-2 min-w-0 overflow-hidden"
                         >
                           <div className="flex-1 min-w-0">
-                            <p className="font-mono text-xs truncate">{change.file}</p>
+                            <p className="font-mono text-xs truncate">{change.filePath}</p>
                             <p className="text-xs text-muted-foreground capitalize">
-                              {change.action}
+                              {change.changeType}
                             </p>
                           </div>
                           {onApplyChange && (

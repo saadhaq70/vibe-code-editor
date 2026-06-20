@@ -4,7 +4,6 @@ import {
   indexCodebase,
   findRelatedFiles,
   createCodebaseSummary,
-  type CodebaseIndex,
 } from "@/lib/codebase-indexer";
 
 interface CodeSuggestionRequest {

@@ -39,7 +39,6 @@ export async function POST(request: NextRequest) {
       instruction,
       templateData,
       currentFilePath,
-      currentFileContent,
       selectedCode,
       contextFiles,
     } = body;
@@ -94,8 +93,7 @@ export async function POST(request: NextRequest) {
         exports: [...f.exports, ...f.components],
       })),
       createCodebaseSummary(codebaseIndex, 5000),
-      selectedCode,
-      currentFileContent
+      selectedCode
     );
 
     // Generate modifications using AI
@@ -130,8 +128,7 @@ function buildModificationPrompt(
   instruction: string,
   files: Array<{ path: string; content: string; exports: string[] }>,
   codebaseSummary: string,
-  selectedCode?: string,
-  currentFileContent?: string
+  selectedCode?: string
 ): string {
   let prompt = `You are an expert code modification assistant. Your task is to analyze code and make precise modifications based on user instructions.
 
@@ -250,7 +247,7 @@ async function generateModifications(
     console.log("🤖 AI Response received:", aiResponse.substring(0, 200));
 
     // Extract JSON from response (handle markdown code blocks)
-    let jsonMatch = aiResponse.match(/```json\s*([\s\S]*?)\s*```/);
+    const jsonMatch = aiResponse.match(/```json\s*([\s\S]*?)\s*```/);
     if (jsonMatch) {
       aiResponse = jsonMatch[1];
     } else {
@@ -271,7 +268,7 @@ async function generateModifications(
 
     try {
       modifications = JSON.parse(aiResponse.trim());
-    } catch (parseError) {
+    } catch {
       console.error("Failed to parse AI response as JSON:", aiResponse);
       throw new Error("AI response was not valid JSON");
     }

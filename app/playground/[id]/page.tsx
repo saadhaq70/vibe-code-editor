@@ -195,7 +195,7 @@ const MainPlaygroundPage = () => {
         console.log(`📝 Applying ${modifications.length} modifications...`);
 
         // Clone the template data
-        let updatedTemplateData = JSON.parse(JSON.stringify(templateData)) as TemplateFolder;
+        const updatedTemplateData = JSON.parse(JSON.stringify(templateData)) as TemplateFolder;
 
         // Helper function to find and update a file in the template structure
         const updateFileInStructure = (
@@ -243,8 +243,8 @@ const MainPlaygroundPage = () => {
               try {
                 await writeFileSync(mod.filePath, mod.modifiedContent);
                 await instance.fs.writeFile(mod.filePath, mod.modifiedContent);
-              } catch (err) {
-                console.error(`Failed to sync ${mod.filePath} to WebContainer:`, err);
+              } catch {
+                console.error(`Failed to sync ${mod.filePath} to WebContainer`);
               }
             }
           } else if (mod.changeType === "create") {
@@ -259,7 +259,6 @@ const MainPlaygroundPage = () => {
         setTemplateData(updatedTemplateData);
 
         // Update any open files that were modified
-        const modifiedPaths = modifications.map((m) => m.filePath);
         const updatedOpenFiles = openFiles.map((file) => {
           const filePath = `${file.filename}.${file.fileExtension}`;
           const modification = modifications.find((m) =>
@@ -324,7 +323,7 @@ const MainPlaygroundPage = () => {
 
    const updatedTemplateData = JSON.parse(
           JSON.stringify(latestTemplateData)
-        );
+        ) as TemplateFolder;
 
         const updateFileContent = (items: (TemplateFile | TemplateFolder)[]): (TemplateFile | TemplateFolder)[] =>
           items.map((item) => {
