@@ -21,7 +21,12 @@ export default async function DashboardLayout({
     ANGULAR: "Terminal",
   }
 
-  const formattedPlaygroundData = playgroundData?.map((item)=>({
+  const formattedPlaygroundData = playgroundData?.map((item: {
+    id: string;
+    title: string;
+    template: string;
+    Starmark?: Array<{ isMarked: boolean }>;
+  })=>({
     id:item.id,
     name:item.title,
     starred:item.Starmark?.[0]?.isMarked || false,
