@@ -28,24 +28,41 @@ export async function GET(
     return Response.json({ error: "Missing playground ID" }, { status: 400 });
   }
 
-  const playground = await db.playground.findUnique({
-    where:{id}
-  })
-
-  if (!playground) {
-    return Response.json({ error: "Playground not found" }, { status: 404 });
-  }
-  
-  const templateKey = playground.template as keyof typeof templatePaths;
-  const templatePath = templatePaths[templateKey]
-
-  if (!templatePath) {
-    return Response.json({ error: "Invalid template" }, { status: 404 });
-  }
-
   try {
+    const playground = await db.playground.findUnique({
+      where:{id}
+    })
+
+    if (!playground) {
+      return Response.json({ error: "Playground not found" }, { status: 404 });
+    }
+    
+    const templateKey = playground.template as keyof typeof templatePaths;
+    const templatePath = templatePaths[templateKey]
+
+    if (!templatePath) {
+      return Response.json({ error: "Invalid template" }, { status: 404 });
+    }
+
     const inputPath = path.join(process.cwd() , templatePath);
-    const outputFile = path.join(process.cwd() , `output/${templateKey}.json`);
+    
+    // Check if template directory exists
+    try {
+      await fs.access(inputPath);
+    } catch (error) {
+      console.error(`Template directory not found: ${inputPath}`);
+      return Response.json({ 
+        error: "Template directory not found", 
+        details: `Path: ${inputPath}`,
+        template: templateKey
+      }, { status: 404 });
+    }
+
+    const outputDir = path.join(process.cwd() , `output`);
+    const outputFile = path.join(outputDir , `${templateKey}.json`);
+
+    // Ensure output directory exists
+    await fs.mkdir(outputDir, { recursive: true });
 
     await saveTemplateStructureToJson(inputPath , outputFile);
     const result = await readTemplateStructureFromJson(outputFile);
@@ -55,11 +72,19 @@ export async function GET(
       return Response.json({ error: "Invalid JSON structure" }, { status: 500 });
     }
 
-    await fs.unlink(outputFile)
+    // Clean up the output file
+    try {
+      await fs.unlink(outputFile);
+    } catch (error) {
+      console.warn("Failed to delete temporary file:", error);
+    }
 
     return Response.json({ success: true, templateJson: result }, { status: 200 });
   } catch (error) {
     console.error("Error generating template JSON:", error);
-    return Response.json({ error: "Failed to generate template" }, { status: 500 });
+    return Response.json({ 
+      error: "Failed to generate template", 
+      details: error instanceof Error ? error.message : "Unknown error"
+    }, { status: 500 });
   }
 }

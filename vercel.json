@@ -25,5 +25,8 @@
       "destination": "https://vibe-code-editor-jet.vercel.app/:path*",
       "permanent": true
     }
+  ],
+  "includeFiles": [
+    "vibecode-starters/**"
   ]
 }
