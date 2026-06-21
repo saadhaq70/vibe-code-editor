@@ -1,0 +1,45 @@
+{
+  "folderName": "react-ts",
+  "items": [
+    {
+      "filename": "package",
+      "fileExtension": "json",
+      "content": "{\n  \"name\": \"react-ts-starter\",\n  \"private\": true,\n  \"scripts\": {\n    \"start\": \"react-scripts start\",\n    \"build\": \"react-scripts build\",\n    \"test\": \"react-scripts test --env=jsdom\",\n    \"eject\": \"react-scripts eject\"\n  },\n  \"dependencies\": {\n    \"@types/react\": \"^18.2.21\",\n    \"@types/react-dom\": \"^18.2.7\",\n    \"react\": \"^18.2.0\",\n    \"react-dom\": \"^18.2.0\"\n  },\n  \"devDependencies\": {\n    \"react-scripts\": \"^5.0.1\",\n    \"typescript\": \"^4.9.5\"\n  },\n  \"browserslist\": [\n    \"defaults\"\n  ]\n}\n"
+    },
+    {
+      "folderName": "public",
+      "items": [
+        {
+          "filename": "index",
+          "fileExtension": "html",
+          "content": "<div id=\"app\"></div>"
+        }
+      ]
+    },
+    {
+      "folderName": "src",
+      "items": [
+        {
+          "filename": "App",
+          "fileExtension": "tsx",
+          "content": "import { FC } from 'react';\n\nimport './style.css';\n\nexport const App: FC<{ name: string }> = ({ name }) => {\n  return (\n    <div>\n      <h1>Hello {name}!</h1>\n      <p>Start editing to see some magic happen :)</p>\n    </div>\n  );\n};\n"
+        },
+        {
+          "filename": "index",
+          "fileExtension": "tsx",
+          "content": "import { StrictMode } from 'react';\nimport { createRoot } from 'react-dom/client';\n\nimport { App } from './App';\n\nconst root = createRoot(document.getElementById('app'));\n\nroot.render(\n  <StrictMode>\n    <App name=\"StackBlitz\" />\n  </StrictMode>\n);\n"
+        },
+        {
+          "filename": "style",
+          "fileExtension": "css",
+          "content": "* {\n  box-sizing: border-box;\n}\n\nbody {\n  margin: 0;\n  padding: 1rem;\n  font-family: system-ui, sans-serif;\n  color: black;\n  background-color: white;\n}\n\nh1 {\n  font-weight: 800;\n  font-size: 1.5rem;\n}\n"
+        }
+      ]
+    },
+    {
+      "filename": "tsconfig",
+      "fileExtension": "json",
+      "content": "{\n  \"compilerOptions\": {\n    \"jsx\": \"react-jsx\",\n    \"lib\": [\"DOM\", \"ES2022\"],\n    \"moduleResolution\": \"node\",\n    \"target\": \"ES2022\"\n  }\n}\n"
+    }
+  ]
+}

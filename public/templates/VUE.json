@@ -1,0 +1,45 @@
+{
+  "folderName": "vue",
+  "items": [
+    {
+      "filename": "package",
+      "fileExtension": "json",
+      "content": "{\n  \"name\": \"vue-starter\",\n  \"private\": true,\n  \"scripts\": {\n    \"serve\": \"vue-cli-service serve\",\n    \"build\": \"vue-cli-service build\"\n  },\n  \"dependencies\": {\n    \"vue\": \"^3.3.4\"\n  },\n  \"devDependencies\": {\n    \"core-js\": \"^3.32.2\",\n    \"@vue/cli-plugin-babel\": \"^5.0.8\",\n    \"@vue/cli-service\": \"^5.0.8\"\n  }\n}\n"
+    },
+    {
+      "folderName": "public",
+      "items": [
+        {
+          "filename": "index",
+          "fileExtension": "html",
+          "content": "<!DOCTYPE html>\n<html lang=\"en\">\n  <head>\n    <title>Vue App</title>\n    <meta charset=\"UTF-8\" />\n    <meta name=\"viewport\" content=\"width=device-width\" />\n  </head>\n  <body>\n    <div id=\"app\"></div>\n    <!-- built files will be auto injected -->\n  </body>\n</html>\n"
+        }
+      ]
+    },
+    {
+      "folderName": "src",
+      "items": [
+        {
+          "filename": "App",
+          "fileExtension": "vue",
+          "content": "<template>\n  <div id=\"app\">\n    <img\n      alt=\"Vue logo\"\n      width=\"200\"\n      height=\"200\"\n      src=\"https://vuejs.org/images/logo.png\"\n    />\n    <HelloWorld msg=\"Welcome to Your Vue.js App\" />\n  </div>\n</template>\n\n<script>\nimport HelloWorld from './components/HelloWorld.vue';\n\nexport default {\n  name: 'App',\n  components: {\n    HelloWorld,\n  },\n};\n</script>\n\n<style>\n#app {\n  font-family: Avenir, Helvetica, Arial, sans-serif;\n  -webkit-font-smoothing: antialiased;\n  -moz-osx-font-smoothing: grayscale;\n  text-align: center;\n  color: #2c3e50;\n  margin-top: 60px;\n}\n</style>\n"
+        },
+        {
+          "folderName": "components",
+          "items": [
+            {
+              "filename": "HelloWorld",
+              "fileExtension": "vue",
+              "content": "<template>\n  <div class=\"hello\">\n    <h1>{{ msg }}</h1>\n    <p>\n      For a guide and recipes on how to configure / customize this project, check out the\n      <a href=\"https://cli.vuejs.org\" target=\"_blank\" rel=\"noopener\">vue-cli documentation</a>.\n    </p>\n    <h3>Installed CLI Plugins</h3>\n    <ul>\n      <li><a href=\"https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-babel\" target=\"_blank\" rel=\"noopener\">babel</a></li>\n    </ul>\n    <h3>Essential Links</h3>\n    <ul>\n      <li><a href=\"https://vuejs.org\" target=\"_blank\" rel=\"noopener\">Core Docs</a></li>\n      <li><a href=\"https://forum.vuejs.org\" target=\"_blank\" rel=\"noopener\">Forum</a></li>\n      <li><a href=\"https://chat.vuejs.org\" target=\"_blank\" rel=\"noopener\">Community Chat</a></li>\n      <li><a href=\"https://twitter.com/vuejs\" target=\"_blank\" rel=\"noopener\">Twitter</a></li>\n      <li><a href=\"https://news.vuejs.org\" target=\"_blank\" rel=\"noopener\">News</a></li>\n    </ul>\n    <h3>Ecosystem</h3>\n    <ul>\n      <li><a href=\"https://router.vuejs.org\" target=\"_blank\" rel=\"noopener\">vue-router</a></li>\n      <li><a href=\"https://vuex.vuejs.org\" target=\"_blank\" rel=\"noopener\">vuex</a></li>\n      <li><a href=\"https://github.com/vuejs/vue-devtools#vue-devtools\" target=\"_blank\" rel=\"noopener\">vue-devtools</a></li>\n      <li><a href=\"https://vue-loader.vuejs.org\" target=\"_blank\" rel=\"noopener\">vue-loader</a></li>\n      <li><a href=\"https://github.com/vuejs/awesome-vue\" target=\"_blank\" rel=\"noopener\">awesome-vue</a></li>\n    </ul>\n  </div>\n</template>\n\n<script>\nexport default {\n  name: 'HelloWorld',\n  props: {\n    msg: String\n  }\n}\n</script>\n\n<!-- Add \"scoped\" attribute to limit CSS to this component only -->\n<style scoped>\nh3 {\n  margin: 40px 0 0;\n}\nul {\n  list-style-type: none;\n  padding: 0;\n}\nli {\n  display: inline-block;\n  margin: 0 10px;\n}\na {\n  color: #42b983;\n}\n</style>\n"
+            }
+          ]
+        },
+        {
+          "filename": "main",
+          "fileExtension": "js",
+          "content": "import { createApp } from 'vue';\nimport App from './App.vue';\n\ncreateApp(App).mount('#app');\n"
+        }
+      ]
+    }
+  ]
+}

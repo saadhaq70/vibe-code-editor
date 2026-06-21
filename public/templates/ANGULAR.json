@@ -1,0 +1,50 @@
+{
+  "folderName": "angular",
+  "items": [
+    {
+      "filename": "angular",
+      "fileExtension": "json",
+      "content": "{\n  \"$schema\": \"./node_modules/@angular/cli/lib/config/schema.json\",\n  \"cli\": {\n    \"analytics\": \"1e1de97b-a744-405a-8b5a-0397bb3d01ce\"\n  },\n  \"newProjectRoot\": \"projects\",\n  \"projects\": {\n    \"demo\": {\n      \"architect\": {\n        \"build\": {\n          \"builder\": \"@angular/build:application\",\n          \"configurations\": {\n            \"development\": {\n              \"extractLicenses\": false,\n              \"namedChunks\": true,\n              \"optimization\": false,\n              \"sourceMap\": true\n            },\n            \"production\": {\n              \"extractLicenses\": true,\n              \"namedChunks\": false,\n              \"optimization\": true,\n              \"outputHashing\": \"all\",\n              \"sourceMap\": false\n            }\n          },\n          \"options\": {\n            \"assets\": [],\n            \"index\": \"src/index.html\",\n            \"browser\": \"src/main.ts\",\n            \"outputPath\": \"dist/demo\",\n            \"polyfills\": [],\n            \"scripts\": [],\n            \"styles\": [\"src/global_styles.css\"],\n            \"tsConfig\": \"tsconfig.app.json\"\n          }\n        },\n        \"serve\": {\n          \"builder\": \"@angular/build:dev-server\",\n          \"configurations\": {\n            \"development\": {\n              \"buildTarget\": \"demo:build:development\"\n            },\n            \"production\": {\n              \"buildTarget\": \"demo:build:production\"\n            }\n          },\n          \"defaultConfiguration\": \"development\"\n        }\n      },\n      \"prefix\": \"app\",\n      \"projectType\": \"application\",\n      \"root\": \"\",\n      \"schematics\": {},\n      \"sourceRoot\": \"src\"\n    }\n  },\n  \"version\": 1\n}\n"
+    },
+    {
+      "filename": "netlify",
+      "fileExtension": "toml",
+      "content": "[build]\ncommand = \"npx ng build\"\npublish = \"dist/demo/browser\"\n\n[[redirects]]\n  from = \"/*\"\n  to = \"/index.html\"\n  status = 200\n"
+    },
+    {
+      "filename": "package",
+      "fileExtension": "json",
+      "content": "{\n  \"name\": \"angular-starter\",\n  \"private\": true,\n  \"scripts\": {\n    \"ng\": \"ng\",\n    \"start\": \"ng serve\",\n    \"build\": \"ng build\"\n  },\n  \"dependencies\": {\n    \"@angular/common\": \"^21.1.0\",\n    \"@angular/compiler\": \"^21.1.0\",\n    \"@angular/core\": \"^21.1.0\",\n    \"@angular/forms\": \"^21.1.0\",\n    \"@angular/platform-browser\": \"^21.1.0\",\n    \"@angular/router\": \"^21.1.0\",\n    \"rxjs\": \"^7.8.1\",\n    \"tslib\": \"^2.5.0\"\n  },\n  \"devDependencies\": {\n    \"@angular/build\": \"^21.1.0\",\n    \"@angular/cli\": \"^21.1.0\",\n    \"@angular/compiler-cli\": \"^21.1.0\",\n    \"typescript\": \"^5.9.3\"\n  }\n}\n"
+    },
+    {
+      "folderName": "src",
+      "items": [
+        {
+          "filename": "global_styles",
+          "fileExtension": "css",
+          "content": "/* Add application styles & imports to this file! */\n"
+        },
+        {
+          "filename": "index",
+          "fileExtension": "html",
+          "content": "<!DOCTYPE html>\n<html lang=\"en\">\n  <head>\n    <title>My app</title>\n    <meta charset=\"UTF-8\" />\n    <base href=\"/\">\n    <meta property=\"og:image\" content=\"https://bolt.new/static/og_default.png\" />\n    <meta name=\"twitter:card\" content=\"summary_large_image\" />\n    <meta name=\"twitter:image\" content=\"https://bolt.new/static/og_default.png\" />\n  </head>\n  <body>\n    <app-root>Loading...</app-root>\n  </body>\n</html>\n"
+        },
+        {
+          "filename": "main",
+          "fileExtension": "ts",
+          "content": "import { Component, signal } from '@angular/core';\nimport { bootstrapApplication } from '@angular/platform-browser';\n\n@Component({\n  selector: 'app-root',\n  template: `\n    <h1>Hello from {{ name }}!</h1>\n    <a target=\"_blank\" href=\"https://angular.dev/overview\">\n      Learn more about Angular\n    </a>\n    <button (click)=\"counter.set(counter() - 1)\">--</button>\n    <span> Counter: {{ counter() }} </span>\n    <button (click)=\"counter.set(counter() + 1)\">++</button>\n  `,\n})\nexport class App {\n  name = 'Angular';\n  counter = signal(0);\n}\n\nbootstrapApplication(App);\n"
+        }
+      ]
+    },
+    {
+      "filename": "tsconfig.app",
+      "fileExtension": "json",
+      "content": "/* To learn more about this file see: https://angular.io/config/tsconfig. */\n{\n  \"extends\": \"./tsconfig.json\",\n  \"compilerOptions\": {\n    \"outDir\": \"./out-tsc/app\",\n    \"types\": []\n  },\n  \"files\": [\"src/main.ts\"],\n  \"include\": [\"src/**/*.d.ts\"]\n}\n"
+    },
+    {
+      "filename": "tsconfig",
+      "fileExtension": "json",
+      "content": "/* To learn more about this file see: https://angular.io/config/tsconfig. */\n{\n  \"compileOnSave\": false,\n  \"compilerOptions\": {\n    \"outDir\": \"./dist/out-tsc\",\n    \"forceConsistentCasingInFileNames\": true,\n    \"strict\": true,\n    \"noImplicitOverride\": true,\n    \"noPropertyAccessFromIndexSignature\": true,\n    \"noImplicitReturns\": true,\n    \"noFallthroughCasesInSwitch\": true,\n    \"esModuleInterop\": true,\n    \"sourceMap\": true,\n    \"declaration\": false,\n    \"experimentalDecorators\": true,\n    \"moduleResolution\": \"bundler\",\n    \"importHelpers\": true,\n    \"target\": \"ES2022\",\n    \"module\": \"ES2022\",\n    \"useDefineForClassFields\": false\n  },\n  \"angularCompilerOptions\": {\n    \"enableI18nLegacyMessageIdFormat\": false,\n    \"strictInjectionParameters\": true,\n    \"strictInputAccessModifiers\": true,\n    \"strictTemplates\": true,\n    \"strictStandalone\": true\n  }\n}\n"
+    }
+  ]
+}

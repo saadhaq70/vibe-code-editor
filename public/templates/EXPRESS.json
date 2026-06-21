@@ -1,0 +1,40 @@
+{
+  "folderName": "express-simple",
+  "items": [
+    {
+      "filename": "README",
+      "fileExtension": "md",
+      "content": "# Simple express demo\n\n> Express: fast, unopinionated, minimalist web framework for Node.js\n\nThis project shows a simple express server serving a single HTML page and using `express.static` to serve static files.\n\nCheck out the [express documentation](https://expressjs.com/) for more information.\n"
+    },
+    {
+      "filename": "index",
+      "fileExtension": "js",
+      "content": "const express = require('express');\nconst { resolve } = require('path');\n\nconst app = express();\nconst port = 3010;\n\napp.use(express.static('static'));\n\napp.get('/', (req, res) => {\n  res.sendFile(resolve(__dirname, 'pages/index.html'));\n});\n\napp.listen(port, () => {\n  console.log(`Example app listening at http://localhost:${port}`);\n});\n"
+    },
+    {
+      "filename": "package",
+      "fileExtension": "json",
+      "content": "{\n  \"name\": \"express-simple-starter\",\n  \"private\": true,\n  \"scripts\": {\n    \"start\": \"node index.js\"\n  },\n  \"dependencies\": {\n    \"express\": \"^4.18.2\"\n  }\n}\n"
+    },
+    {
+      "folderName": "pages",
+      "items": [
+        {
+          "filename": "index",
+          "fileExtension": "html",
+          "content": "<!DOCTYPE html>\r\n<html lang=\"en\">\r\n  <head>\r\n    <title>Hello Express!</title>\r\n    <meta charset=\"UTF-8\" />\r\n    <meta name=\"viewport\" content=\"width=device-width\" />\r\n    <link rel=\"stylesheet\" href=\"./style.css\" />\r\n  </head>\r\n  <body>\r\n    <h1>Hello Express!</h1>\r\n    <p>Showing <code>pages/index.html</code></p>\r\n  </body>\r\n</html>\r\n"
+        }
+      ]
+    },
+    {
+      "folderName": "static",
+      "items": [
+        {
+          "filename": "style",
+          "fileExtension": "css",
+          "content": "* {\n  box-sizing: border-box;\n}\n\nbody {\n  margin: 0;\n  padding: 1rem;\n  font-family: system-ui, sans-serif;\n  color: black;\n  background-color: white;\n}\n\nh1 {\n  font-weight: 800;\n  font-size: 1.5rem;\n}\n"
+        }
+      ]
+    }
+  ]
+}
