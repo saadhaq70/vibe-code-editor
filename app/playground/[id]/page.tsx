@@ -195,7 +195,7 @@ const MainPlaygroundPage = () => {
         console.log(`📝 Applying ${modifications.length} modifications...`);
 
         // Clone the template data
-        let updatedTemplateData = JSON.parse(JSON.stringify(templateData)) as TemplateFolder;
+        const updatedTemplateData = JSON.parse(JSON.stringify(templateData)) as TemplateFolder;
 
         // Helper function to find and update a file in the template structure
         const updateFileInStructure = (
@@ -259,7 +259,6 @@ const MainPlaygroundPage = () => {
         setTemplateData(updatedTemplateData);
 
         // Update any open files that were modified
-        const modifiedPaths = modifications.map((m) => m.filePath);
         const updatedOpenFiles = openFiles.map((file) => {
           const filePath = `${file.filename}.${file.fileExtension}`;
           const modification = modifications.find((m) =>
