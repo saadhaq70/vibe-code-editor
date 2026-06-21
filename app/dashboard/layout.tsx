@@ -40,7 +40,7 @@ export default async function DashboardLayout({
   <SidebarProvider>
     <DashboardSidebar initialPlaygroundData={formattedPlaygroundData}/>
     <SidebarInset>
-      <main className="flex-1">{children}</main>
+      {children}
     </SidebarInset>
   </SidebarProvider>
   )

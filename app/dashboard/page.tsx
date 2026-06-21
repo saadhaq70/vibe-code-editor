@@ -17,7 +17,7 @@ const Page = async () => {
         <Separator orientation="vertical" className="mr-2 h-4" />
         <h1 className="text-lg font-semibold">Dashboard</h1>
       </header>
-      <div className="flex flex-col justify-start items-center min-h-screen mx-auto max-w-7xl px-4 py-10 w-full">
+      <div className="flex-1 flex flex-col justify-start items-center mx-auto max-w-7xl px-4 py-10 w-full">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
           <AddNewButton />
           <AddRepo />
