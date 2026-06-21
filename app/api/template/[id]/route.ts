@@ -47,15 +47,35 @@ export async function GET(
     const inputPath = path.join(process.cwd() , templatePath);
     
     // Check if template directory exists
+    let templateExists = false;
     try {
       await fs.access(inputPath);
+      templateExists = true;
     } catch (error) {
-      console.error(`Template directory not found: ${inputPath}`);
+      console.warn(`Template directory not found: ${inputPath}`);
+    }
+
+    // If template directory doesn't exist, return a basic structure
+    if (!templateExists) {
+      console.log(`Using fallback template for ${templateKey}`);
       return Response.json({ 
-        error: "Template directory not found", 
-        details: `Path: ${inputPath}`,
-        template: templateKey
-      }, { status: 404 });
+        success: true, 
+        templateJson: {
+          folderName: templateKey,
+          items: [
+            {
+              filename: "index",
+              fileExtension: "html",
+              content: "<!DOCTYPE html>\n<html>\n<head>\n  <title>Project</title>\n</head>\n<body>\n  <h1>Welcome to your project</h1>\n</body>\n</html>"
+            },
+            {
+              filename: "README",
+              fileExtension: "md",
+              content: `# ${templateKey} Project\n\nThis is your ${templateKey} project.`
+            }
+          ]
+        }
+      }, { status: 200 });
     }
 
     const outputDir = path.join(process.cwd() , `output`);
@@ -75,8 +95,8 @@ export async function GET(
     // Clean up the output file
     try {
       await fs.unlink(outputFile);
-    } catch (error) {
-      console.warn("Failed to delete temporary file:", error);
+    } catch (cleanupError) {
+      console.warn("Failed to delete temporary file:", cleanupError);
     }
 
     return Response.json({ success: true, templateJson: result }, { status: 200 });
