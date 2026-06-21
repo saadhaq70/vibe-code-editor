@@ -8,7 +8,9 @@ export default function PlaygroundLayout({
 }) {
   return (
     <SidebarProvider>
-      {children}
+      <div className="playground-content">
+        {children}
+      </div>
     </SidebarProvider>
   );
 }

@@ -43,7 +43,7 @@ export default async function DashboardLayout({
     <div className="flex min-h-screen w-full overflow-x-hidden">
       {/* Dashboard Sidebar */}
       <DashboardSidebar initialPlaygroundData={formattedPlaygroundData}/>
-      <main className="flex-1">{children}</main>
+      <main className="flex-1 dashboard-main">{children}</main>
     </div>
   </SidebarProvider>
   )
