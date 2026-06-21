@@ -1,0 +1,29 @@
+{
+  "buildCommand": "prisma generate && next build",
+  "framework": "nextjs",
+  "installCommand": "npm install",
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "vibe-code-editor-git-main-saad-hs-projects-fbf021e8.vercel.app"
+        }
+      ],
+      "destination": "https://vibe-code-editor-jet.vercel.app/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "vibe-code-editor-h3t7j5fgw-saad-hs-projects-fbf021e8.vercel.app"
+        }
+      ],
+      "destination": "https://vibe-code-editor-jet.vercel.app/:path*",
+      "permanent": true
+    }
+  ]
+}

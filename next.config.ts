@@ -29,7 +29,10 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  reactStrictMode:false
+  reactStrictMode:false,
+  env: {
+    NEXTAUTH_URL: process.env.NEXTAUTH_URL || 'https://vibe-code-editor-jet.vercel.app',
+  },
 };
 
 export default nextConfig;

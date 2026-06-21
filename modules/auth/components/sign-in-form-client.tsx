@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,17 +8,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Chrome, Github } from "lucide-react";
+import { Github } from "lucide-react";
 import { signIn } from "@/auth";
 
-async function handleGoogleSignIn(){
-"use server"
-await signIn("google")
-}
-
 async function handleGithubSignIn(){
-"use server"
-await signIn("github")
+  "use server"
+  await signIn("github")
 }
 
 const SignInFormClient = () => {
@@ -30,21 +24,15 @@ const SignInFormClient = () => {
           Sign In
         </CardTitle>
         <CardDescription className="text-center">
-          Choose your preferred sign-in method
+          Sign in with your GitHub account
         </CardDescription>
       </CardHeader>
 
       <CardContent className="grid gap-4">
-        <form action={handleGoogleSignIn}>
-          <Button type="submit" variant={"outline"} className="w-full">
-            <Chrome className="mr-2 h-4 w-4" />
-            <span>Sign in with google</span>
-          </Button>
-        </form>
         <form action={handleGithubSignIn}>
           <Button type="submit" variant={"outline"} className="w-full">
             <Github className="mr-2 h-4 w-4" />
-            <span>Sign in with github</span>
+            <span>Sign in with GitHub</span>
           </Button>
         </form>
       </CardContent>
@@ -67,5 +55,3 @@ const SignInFormClient = () => {
 };
 
 export default SignInFormClient;
-
-
