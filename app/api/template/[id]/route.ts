@@ -41,7 +41,7 @@ export async function GET(
         success: true, 
         templateJson: templateData 
       }, { status: 200 });
-    } catch (fileError) {
+    } catch {
       console.warn(`Pre-generated template not found for ${templateKey}, using fallback`);
       
       // Fallback template if JSON file doesn't exist
