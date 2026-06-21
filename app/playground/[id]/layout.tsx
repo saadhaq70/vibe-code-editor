@@ -7,7 +7,7 @@ export default function PlaygroundLayout({
   children: React.ReactNode;
 }) {
   return (
-    <SidebarProvider className="flex min-h-screen w-full">
+    <SidebarProvider>
       {children}
     </SidebarProvider>
   );

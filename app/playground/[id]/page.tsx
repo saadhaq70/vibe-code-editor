@@ -567,7 +567,7 @@ const MainPlaygroundPage = () => {
             </div>
           </header>
 
-          <div className="flex-1 overflow-hidden">
+          <div className="h-[calc(100vh-4rem)]">
             {openFiles.length > 0 ? (
               <div className="h-full flex flex-col">
                 <div className="border-b bg-muted/30">
