@@ -194,8 +194,10 @@ const MainPlaygroundPage = () => {
       try {
         console.log(`📝 Applying ${modifications.length} modifications...`);
 
-        const updatedTemplateData = JSON.parse(JSON.stringify(templateData)) as TemplateFolder;
+        // Clone the template data
+        let updatedTemplateData = JSON.parse(JSON.stringify(templateData)) as TemplateFolder;
 
+        // Helper function to find and update a file in the template structure
         const updateFileInStructure = (
           items: (TemplateFile | TemplateFolder)[],
           targetPath: string,
@@ -205,10 +207,12 @@ const MainPlaygroundPage = () => {
             const item = items[i];
 
             if ("folderName" in item) {
+              // It's a folder, recurse
               if (updateFileInStructure(item.items, targetPath, newContent)) {
                 return true;
               }
             } else {
+              // It's a file, check if it matches
               const itemPath = `${item.filename}.${item.fileExtension}`;
               
               if (targetPath.endsWith(itemPath) || targetPath === itemPath) {
@@ -239,8 +243,8 @@ const MainPlaygroundPage = () => {
               try {
                 await writeFileSync(mod.filePath, mod.modifiedContent);
                 await instance.fs.writeFile(mod.filePath, mod.modifiedContent);
-              } catch {
-                console.error(`Failed to sync ${mod.filePath} to WebContainer`);
+              } catch (err) {
+                console.error(`Failed to sync ${mod.filePath} to WebContainer:`, err);
               }
             }
           } else if (mod.changeType === "create") {
@@ -255,6 +259,7 @@ const MainPlaygroundPage = () => {
         setTemplateData(updatedTemplateData);
 
         // Update any open files that were modified
+        const modifiedPaths = modifications.map((m) => m.filePath);
         const updatedOpenFiles = openFiles.map((file) => {
           const filePath = `${file.filename}.${file.fileExtension}`;
           const modification = modifications.find((m) =>
@@ -319,7 +324,7 @@ const MainPlaygroundPage = () => {
 
    const updatedTemplateData = JSON.parse(
           JSON.stringify(latestTemplateData)
-        ) as TemplateFolder;
+        );
 
         const updateFileContent = (items: (TemplateFile | TemplateFolder)[]): (TemplateFile | TemplateFolder)[] =>
           items.map((item) => {
