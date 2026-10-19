@@ -5,6 +5,7 @@ import {
   findRelatedFiles,
   createCodebaseSummary,
 } from "@/lib/codebase-indexer";
+import { createGeminiModel } from "@/lib/langchain";
 
 export interface FileModification {
   filePath: string;
@@ -201,85 +202,54 @@ async function generateModifications(
   prompt: string,
   targetFiles: Array<{ path: string; content: string }>
 ): Promise<FileModification[]> {
-  const apiKey = process.env.GEMINI_API_KEY;
-
-  if (!apiKey) {
-    throw new Error("GEMINI_API_KEY is not configured");
-  }
-
   try {
-    console.log("🤖 Calling Gemini API for code modifications...");
+    console.log("🤖 Calling LangChain with Gemini for code modifications...");
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [{ text: prompt }],
+    // Create model with structured output
+    const baseModel = createGeminiModel('code', { maxOutputTokens: 8192 });
+    
+    // Define JSON schema for structured output (no Zod)
+    const schema = {
+      type: "object",
+      properties: {
+        modifications: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              filePath: { type: "string" },
+              modifiedContent: { type: "string" },
+              changeDescription: { type: "string" },
+              changeType: { type: "string", enum: ["update", "create", "delete"] }
             },
-          ],
-          generationConfig: {
-            temperature: 0.2, // Lower temperature for more precise code modifications
-            topK: 40,
-            topP: 0.8,
-            maxOutputTokens: 8192, // Higher limit for multi-file modifications
-          },
-        }),
-      }
-    );
+            required: ["filePath", "modifiedContent", "changeDescription", "changeType"]
+          }
+        }
+      },
+      required: ["modifications"]
+    };
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Gemini API error:", response.status, errorText);
-      throw new Error(`Gemini API error: ${response.status}`);
-    }
+    // Create structured output model
+    const structuredModel = baseModel.withStructuredOutput(schema);
 
-    const data = await response.json();
-
-    if (!data.candidates || data.candidates.length === 0) {
-      throw new Error("No response from Gemini API");
-    }
-
-    let aiResponse = data.candidates[0].content.parts[0].text;
-    console.log("🤖 AI Response received:", aiResponse.substring(0, 200));
-
-    // Extract JSON from response (handle markdown code blocks)
-    const jsonMatch = aiResponse.match(/```json\s*([\s\S]*?)\s*```/);
-    if (jsonMatch) {
-      aiResponse = jsonMatch[1];
-    } else {
-      // Try to find JSON array directly
-      const arrayMatch = aiResponse.match(/\[\s*{[\s\S]*}\s*\]/);
-      if (arrayMatch) {
-        aiResponse = arrayMatch[0];
-      }
-    }
-
-    // Parse the JSON response
-    let modifications: Array<{
+    // Invoke the model
+    const result = await structuredModel.invoke(prompt) as { modifications: Array<{
       filePath: string;
       modifiedContent: string;
       changeDescription: string;
       changeType: "update" | "create" | "delete";
-    }>;
+    }> };
 
-    try {
-      modifications = JSON.parse(aiResponse.trim());
-    } catch {
-      console.error("Failed to parse AI response as JSON:", aiResponse);
-      throw new Error("AI response was not valid JSON");
-    }
+    // Extract modifications array
+    const modifications = result.modifications || [];
 
     if (!Array.isArray(modifications)) {
-      console.error("AI response is not an array:", modifications);
-      throw new Error("AI response must be an array of modifications");
+      console.error("AI response does not contain modifications array:", result);
+      throw new Error("AI response must contain a modifications array");
     }
 
     // Map to FileModification format with original content
-    const result: FileModification[] = modifications.map((mod) => {
+    const fileModifications: FileModification[] = modifications.map((mod) => {
       const originalFile = targetFiles.find((f) => f.path === mod.filePath);
 
       return {
@@ -291,7 +261,8 @@ async function generateModifications(
       };
     });
 
-    return result;
+    console.log(`✅ Generated ${fileModifications.length} modifications using LangChain`);
+    return fileModifications;
   } catch (error) {
     console.error("Error generating modifications:", error);
     throw error;

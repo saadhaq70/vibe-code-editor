@@ -1,122 +1,66 @@
-# 🧠 Vibecode Editor – AI-Powered Web IDE
+# Vibe Code Editor
 
-![Vibecode Editor Thumbnail](public/vibe-code-editor-thumbnaail.svg)
+Vibe Code Editor is a browser based development workspace for creating projects, editing files, running them in a live preview, and getting AI help.
 
-**Vibecode Editor** is a blazing-fast, AI-integrated web IDE built entirely in the browser using **Next.js App Router**, **WebContainers**, **Monaco Editor**, and **local LLMs via Ollama**. It offers real-time code execution, an AI-powered chat assistant, and support for multiple tech stacks — all wrapped in a stunning developer-first UI.
+## Features
 
----
+- **Project dashboard:** Create and reopen projects, browse recent and starred workspaces, and start from React, Next.js, Express, Vue, Hono, or Angular templates.
+- **GitHub sign in:** Authenticate with GitHub and keep project data in the configured MongoDB database through Prisma.
+- **File explorer:** Browse a project, open multiple files, and create, rename, or delete files and folders.
+- **Code editor:** Edit files in Monaco with language highlighting and inline AI suggestions. Save one file or all changed files.
+- **Live runtime:** Run supported projects in a WebContainer with an embedded preview and terminal.
+- **AI chat:** Ask questions about the project, request explanations or code changes, and apply suggested file modifications from the chat.
+- **Responsive workspace:** On narrow screens, use Code, Preview, and Terminal views; on wide screens, arrange the editor and preview beside each other. AI chat opens as a phone sheet or a desktop side dock.
+- **Theme support:** Switch between light and dark appearance.
 
-## 🚀 Features
+## AI tools
 
-- 🔐 **OAuth Login with NextAuth** – Supports Google & GitHub login.
-- 🎨 **Modern UI** – Built with TailwindCSS & ShadCN UI.
-- 🌗 **Dark/Light Mode** – Seamlessly toggle between themes.
-- 🧱 **Project Templates** – Choose from React, Next.js, Express, Hono, Vue, or Angular.
-- 🗂️ **Custom File Explorer** – Create, rename, delete, and manage files/folders easily.
-- 🖊️ **Enhanced Monaco Editor** – Syntax highlighting, formatting, keybindings, and AI autocomplete.
-- 💡 **AI Suggestions with Ollama** – Local models give you code completion on `Ctrl + Space` or double `Enter`. Accept with `Tab`.
-- ⚙️ **WebContainers Integration** – Instantly run frontend/backend apps right in the browser.
-- 💻 **Terminal with xterm.js** – Fully interactive embedded terminal experience.
-- 🤖 **AI Chat Assistant** – Share files with the AI and get help, refactors, or explanations.
+AI features use Gemini through LangChain and require `GEMINI_API_KEY`.
 
----
+- **Inline suggestions:** Request a completion with `Ctrl+.` or `Ctrl+Space`; accept with `Tab` and reject with `Esc`.
+- **AI chat:** Open Chat from the playground toolbar or the AI menu. Press `Enter` to send and `Shift+Enter` to add a line.
+- **Suggested changes:** Review the assistant’s proposed file changes and use Apply to update the workspace.
 
-## 🧱 Tech Stack
+## Run locally
 
-| Layer         | Technology                                   |
-|---------------|----------------------------------------------|
-| Framework     | Next.js 15 (App Router)                      |
-| Styling       | TailwindCSS, ShadCN UI                       |
-| Language      | TypeScript                                   |
-| Auth          | NextAuth (Google + GitHub OAuth)             |
-| Editor        | Monaco Editor                                |
-| AI Suggestion | Ollama (LLMs running locally via Docker)     |
-| Runtime       | WebContainers                                |
-| Terminal      | xterm.js                                     |
-| Database      | MongoDB (via DATABASE_URL)                   |
+### Requirements
 
----
+- Node.js and npm
+- MongoDB connection string
+- GitHub OAuth application
+- Gemini API key for AI features
 
-## 🛠️ Getting Started
+### Setup
 
-### 1. Clone the Repo
+1. Install dependencies:
 
-```bash
-git clone https://github.com/your-username/vibecode-editor.git
-cd vibecode-editor
-````
+   ```bash
+   npm install
+   ```
 
-### 2. Install Dependencies
+2. Copy `.env.example` to `.env.local` and set the values below.
 
-```bash
-npm install
-```
+   | Variable | Purpose |
+   | --- | --- |
+   | `DATABASE_URL` | MongoDB connection string used by Prisma |
+   | `AUTH_SECRET` | Secret used by NextAuth |
+   | `AUTH_GITHUB_ID` | GitHub OAuth client ID |
+   | `AUTH_GITHUB_SECRET` | GitHub OAuth client secret |
+   | `NEXTAUTH_URL` | Local app URL, usually `http://localhost:3000` |
+   | `GEMINI_API_KEY` | Gemini API key for AI chat and suggestions |
 
-### 3. Set Up Environment Variables
+3. Set the GitHub OAuth callback URL to `http://localhost:3000/api/auth/callback/github` for local development.
 
-Create a `.env.local` file using the template:
+4. Start the app:
 
-```bash
-cp .env.example .env.local
-```
+   ```bash
+   npm run dev
+   ```
 
-Then, fill in your credentials:
+   Open [http://localhost:3000](http://localhost:3000).
 
-```env
-AUTH_SECRET=your_auth_secret
-AUTH_GOOGLE_ID=your_google_client_id
-AUTH_GOOGLE_SECRET=your_google_secret
-AUTH_GITHUB_ID=your_github_client_id
-AUTH_GITHUB_SECRET=your_github_secret
-DATABASE_URL=your_mongodb_connection_string
-NEXTAUTH_URL=http://localhost:3000
-```
+If your database has not been initialized from the Prisma schema, run `npx prisma db push` with the local database URL configured.
 
-### 4. Start Local Ollama Model
+## Tech stack
 
-Make sure [Ollama](https://ollama.com/) and Docker are installed, then run:
-
-```bash
-ollama run codellama
-```
-
-Or use your preferred model that supports code generation.
-
-### 5. Run the Development Server
-
-```bash
-npm run dev
-```
-
-Visit `http://localhost:3000` in your browser.
-
-
----
-
-## 🎯 Keyboard Shortcuts
-
-* `Ctrl + Space` or `Double Enter`: Trigger AI suggestions
-* `Tab`: Accept AI suggestion
-* `/`: Open Command Palette (if implemented)
-
----
-
-
-
----
-
-## 📄 License
-
-This project is licensed under the [MIT License](LICENSE).
-
----
-
-## 🙏 Acknowledgements
-
-* [Monaco Editor](https://microsoft.github.io/monaco-editor/)
-* [Ollama](https://ollama.com/) – for offline LLMs
-* [WebContainers](https://webcontainers.io/)
-* [xterm.js](https://xtermjs.org/)
-* [NextAuth.js](https://next-auth.js.org/)
-
-```
+Next.js App Router, React, TypeScript, Tailwind CSS, shadcn/ui, NextAuth, Prisma, MongoDB, Monaco Editor, WebContainers, xterm.js, and LangChain with Google Gemini.

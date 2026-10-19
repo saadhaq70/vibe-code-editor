@@ -30,6 +30,7 @@ import {
   SidebarMenuItem,
   SidebarMenuSub,
   SidebarRail,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import {
   DropdownMenu,
@@ -95,6 +96,7 @@ export function TemplateFileTree({
   onRenameFile,
   onRenameFolder,
 }: TemplateFileTreeProps) {
+  const { isMobile, setOpenMobile } = useSidebar();
   const isRootFolder = data && typeof data === "object" && "folderName" in data;
   const [isNewFileDialogOpen, setIsNewFileDialogOpen] = React.useState(false);
   const [isNewFolderDialogOpen, setIsNewFolderDialogOpen] =
@@ -106,6 +108,11 @@ export function TemplateFileTree({
 
   const handleAddRootFolder = () => {
     setIsNewFolderDialogOpen(true);
+  };
+
+  const handleSelectFile = (file: TemplateFile) => {
+    onFileSelect?.(file);
+    if (isMobile) setOpenMobile(false);
   };
 
   const handleCreateFile = (filename: string, extension: string) => {
@@ -160,7 +167,7 @@ export function TemplateFileTree({
                   <TemplateNode
                     key={index}
                     item={child}
-                    onFileSelect={onFileSelect}
+                    onFileSelect={handleSelectFile}
                     selectedFile={selectedFile}
                     level={0}
                     path=""
@@ -175,7 +182,7 @@ export function TemplateFileTree({
               ) : (
                 <TemplateNode
                   item={data}
-                  onFileSelect={onFileSelect}
+                  onFileSelect={handleSelectFile}
                   selectedFile={selectedFile}
                   level={0}
                   path=""

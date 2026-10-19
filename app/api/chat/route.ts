@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createGeminiModel, buildMessages, SYSTEM_PROMPTS, loadChatHistory, saveChatMessage } from "@/lib/langchain";
+import { auth } from "@/auth";
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -8,113 +10,13 @@ interface ChatMessage {
 interface ChatRequest {
   message: string;
   history: ChatMessage[];
-}
-
-async function generateAIResponse(messages: ChatMessage[]): Promise<string> {
-  // Use separate API key for chat, fallback to main key if not set
-  const apiKey = process.env.GEMINI_CHAT_API_KEY || process.env.GEMINI_API_KEY;
-  
-  if (!apiKey) {
-    console.error("GEMINI_CHAT_API_KEY or GEMINI_API_KEY is not configured");
-    throw new Error("Gemini API key is not configured");
-  }
-
-  console.log("Using chat API key:", apiKey === process.env.GEMINI_CHAT_API_KEY ? "GEMINI_CHAT_API_KEY" : "GEMINI_API_KEY (fallback)");
-
-  const systemPrompt = `You are a helpful AI coding assistant. You help developers with:
-- Code explanations and debugging
-- Best practices and architecture advice  
-- Writing clean, efficient code
-- Troubleshooting errors
-- Code reviews and optimizations
-
-Always provide clear, practical answers. Use proper code formatting when showing examples.`;
-
-  // Convert chat history to Gemini format
-  const geminiMessages = messages.map((msg) => ({
-    role: msg.role === "assistant" ? "model" : "user",
-    parts: [{ text: msg.content }],
-  }));
-
-  // Prepend system instruction as first user message if no history
-  if (geminiMessages.length === 1) {
-    geminiMessages.unshift({
-      role: "user",
-      parts: [{ text: systemPrompt }],
-    });
-    geminiMessages.push({
-      role: "model",
-      parts: [{ text: "I understand. I'm ready to help you with coding questions and problems. What would you like to know?" }],
-    });
-  }
-
-  try {
-    console.log("Calling Gemini API for chat...");
-
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: geminiMessages,
-          generationConfig: {
-            temperature: 0.7,
-            topK: 40,
-            topP: 0.9,
-            maxOutputTokens: 2048,
-          },
-          safetySettings: [
-            {
-              category: "HARM_CATEGORY_HARASSMENT",
-              threshold: "BLOCK_NONE",
-            },
-            {
-              category: "HARM_CATEGORY_HATE_SPEECH",
-              threshold: "BLOCK_NONE",
-            },
-            {
-              category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-              threshold: "BLOCK_NONE",
-            },
-            {
-              category: "HARM_CATEGORY_DANGEROUS_CONTENT",
-              threshold: "BLOCK_NONE",
-            },
-          ],
-        }),
-      }
-    );
-
-    console.log("Gemini Chat API response status:", response.status);
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Gemini Chat API error:", response.status, errorText);
-      throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
-    }
-
-    const data = await response.json();
-    
-    if (!data.candidates || data.candidates.length === 0) {
-      console.error("No candidates in Gemini chat response");
-      throw new Error("No response from Gemini API");
-    }
-
-    const aiResponse = data.candidates[0].content.parts[0].text;
-    console.log("Generated chat response:", aiResponse.substring(0, 100) + "...");
-    
-    return aiResponse.trim();
-  } catch (error) {
-    console.error("AI generation error:", error);
-    throw new Error(error instanceof Error ? error.message : "Failed to generate AI response");
-  }
+  sessionId?: string; // Optional session ID from frontend
 }
 
 export async function POST(req: NextRequest) {
   try {
     const body: ChatRequest = await req.json();
-    const { message, history = [] } = body;
+    const { message, history = [], sessionId: requestSessionId } = body;
 
     // Validate input
     if (!message || typeof message !== "string") {
@@ -124,7 +26,27 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Validate history format
+    // Get user ID from auth session or use 'anonymous'
+    const session = await auth();
+    const userId = session?.user?.id || 'anonymous';
+
+    // Get or generate session ID
+    const sessionId = requestSessionId || crypto.randomUUID();
+
+    // Load chat history from database
+    let dbHistory: ChatMessage[] = [];
+    try {
+      const rawHistory = await loadChatHistory(userId, sessionId, 10);
+      // Cast to ChatMessage[] since we know the DB stores 'user' or 'assistant' roles
+      dbHistory = rawHistory.filter(
+        msg => msg.role === 'user' || msg.role === 'assistant'
+      ) as ChatMessage[];
+    } catch (error) {
+      console.warn("Failed to load chat history:", error);
+      // Continue without history if DB fails
+    }
+
+    // Validate history format from request
     const validHistory = Array.isArray(history)
       ? history.filter(
           (msg) =>
@@ -136,22 +58,35 @@ export async function POST(req: NextRequest) {
         )
       : [];
 
-    const recentHistory = validHistory.slice(-10);
+    // Merge DB history with request history (prefer DB history)
+    const mergedHistory = dbHistory.length > 0 ? dbHistory : validHistory;
+    const recentHistory = mergedHistory.slice(-10);
 
-    const messages: ChatMessage[] = [
-      ...recentHistory,
-      { role: "user", content: message },
-    ];
+    // Build messages using LangChain
+    const langchainMessages = buildMessages(
+      SYSTEM_PROMPTS.chat,
+      recentHistory,
+      message
+    );
 
-    //   Generate ai response
+    // Generate AI response using LangChain
+    const model = createGeminiModel('chat');
+    const result = await model.invoke(langchainMessages);
+    const aiResponse = typeof result.content === 'string' ? result.content : String(result.content);
 
-    const aiResponse = await generateAIResponse(messages);
-
-
+    // Save user message and assistant response to database
+    try {
+      await saveChatMessage(userId, sessionId, 'user', message);
+      await saveChatMessage(userId, sessionId, 'assistant', aiResponse);
+    } catch (error) {
+      console.warn("Failed to save chat messages:", error);
+      // Continue even if save fails
+    }
 
     return NextResponse.json({
       response: aiResponse,
       timestamp: new Date().toISOString(),
+      sessionId, // Return session ID to frontend
     });
   } catch (error) {
     console.error("Chat API Error:", error);

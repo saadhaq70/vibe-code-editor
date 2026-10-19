@@ -198,7 +198,7 @@ export const AIChatSidePanel: React.FC<AIChatSidePanelProps> = ({
       {/* Backdrop */}
       <div
         className={cn(
-          "fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-opacity duration-300",
+          "fixed inset-0 z-40 bg-black/35 transition-opacity duration-300 sm:bg-black/10 xl:pointer-events-none xl:bg-transparent",
           isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         )}
         onClick={onClose}
@@ -207,23 +207,29 @@ export const AIChatSidePanel: React.FC<AIChatSidePanelProps> = ({
       {/* Side Panel */}
       <div
         className={cn(
-          "fixed right-0 top-0 h-full w-full max-w-4xl bg-zinc-950 border-l border-zinc-800 z-50 flex flex-col transition-transform duration-300 ease-out shadow-2xl",
-          isOpen ? "translate-x-0" : "translate-x-full"
+          "fixed z-50 flex flex-col overflow-hidden border border-zinc-800 bg-zinc-950 shadow-2xl transition-[transform,opacity] duration-300 ease-out",
+          "inset-x-0 bottom-0 h-[min(88dvh,760px)] rounded-t-2xl",
+          "sm:inset-x-3 sm:bottom-3 sm:h-[calc(100dvh-5rem)] sm:rounded-xl",
+          "xl:inset-x-auto xl:bottom-3 xl:right-3 xl:top-16 xl:h-auto xl:max-h-[calc(100dvh-5rem)] xl:w-[26rem] xl:max-w-[calc(100vw_-_20rem)] xl:rounded-2xl",
+          isOpen
+            ? "translate-y-0 opacity-100 xl:translate-x-0"
+            : "pointer-events-none translate-y-full opacity-0 xl:translate-y-0 xl:translate-x-[calc(100%+1rem)]"
         )}
       >
         {/* Header */}
         <div className="shrink-0 border-b border-zinc-800 bg-zinc-900/80 backdrop-blur-sm">
-          <div className="flex items-center justify-between p-6">
+          <div className="mx-auto mt-3 h-1 w-10 rounded-full bg-zinc-700 sm:hidden" />
+          <div className="flex items-center justify-between gap-3 p-4 sm:p-5">
             <div className="flex items-center gap-3">
-              <div className="relative w-10 h-10 border rounded-full flex flex-col justify-center items-center">
+              <div className="relative flex h-9 w-9 shrink-0 flex-col items-center justify-center rounded-full border sm:h-10 sm:w-10">
                 <Image src={"/logo.svg"} alt="Logo" width={28} height={28} />
               </div>
               <div>
                 <h2 className="text-lg font-semibold text-zinc-100">
                   AI Assistant
                 </h2>
-                <p className="text-sm text-zinc-400">
-                  Full codebase context • Powered by Gemini
+                <p className="hidden text-sm text-zinc-400 sm:block">
+                  Ask about your project or request a code change
                 </p>
               </div>
             </div>
@@ -232,6 +238,7 @@ export const AIChatSidePanel: React.FC<AIChatSidePanelProps> = ({
               size="sm"
               onClick={onClose}
               className="h-8 w-8 p-0 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
+              aria-label="Close AI chat"
             >
               <X className="h-4 w-4" />
             </Button>
@@ -240,7 +247,7 @@ export const AIChatSidePanel: React.FC<AIChatSidePanelProps> = ({
 
         {/* Messages Container */}
         <div className="flex-1 overflow-y-auto bg-zinc-950">
-          <div className="p-6 space-y-6">
+          <div className="space-y-4 p-3 sm:space-y-5 sm:p-5">
             {messages.length === 0 && !isLoading && (
               <div className="text-center text-zinc-500 py-16">
                 <div className="relative w-16 h-16 border rounded-full flex flex-col justify-center items-center mx-auto mb-4">
@@ -249,9 +256,8 @@ export const AIChatSidePanel: React.FC<AIChatSidePanelProps> = ({
                 <h3 className="text-xl font-semibold mb-3 text-zinc-300">
                   AI Assistant
                 </h3>
-                <p className="text-zinc-400 max-w-md mx-auto leading-relaxed mb-6">
-                  I can help you with code generation, refactoring, bug fixes, and more.
-                  I have full access to your entire codebase!
+                <p className="mx-auto mb-6 max-w-md leading-relaxed text-zinc-400">
+                  Ask a question about the code, or describe a change you want me to make.
                 </p>
               </div>
             )}
@@ -260,7 +266,7 @@ export const AIChatSidePanel: React.FC<AIChatSidePanelProps> = ({
               <div key={msg.id} className="space-y-4">
                 <div
                   className={cn(
-                    "flex items-start gap-4 group",
+                    "group flex items-start gap-2 sm:gap-4",
                     msg.role === "user" ? "justify-end" : "justify-start"
                   )}
                 >
@@ -272,10 +278,10 @@ export const AIChatSidePanel: React.FC<AIChatSidePanelProps> = ({
 
                   <div
                     className={cn(
-                      "max-w-[85%] rounded-xl shadow-sm",
+                      "min-w-0 max-w-[88%] rounded-xl shadow-sm sm:max-w-[85%]",
                       msg.role === "user"
                         ? "bg-zinc-900/70 text-white p-4 rounded-br-md"
-                        : "bg-zinc-900/80 backdrop-blur-sm text-zinc-100 p-5 rounded-bl-md border border-zinc-800/50"
+                        : "bg-zinc-900/80 backdrop-blur-sm text-zinc-100 p-3 sm:p-5 rounded-bl-md border border-zinc-800/50"
                     )}
                   >
                     <div className="prose prose-invert prose-sm max-w-none">
@@ -388,7 +394,7 @@ export const AIChatSidePanel: React.FC<AIChatSidePanelProps> = ({
         {/* Input Form */}
         <form
           onSubmit={handleSendMessage}
-          className="shrink-0 p-6 border-t border-zinc-800 bg-zinc-900/80 backdrop-blur-sm"
+          className="shrink-0 border-t border-zinc-800 bg-zinc-900/80 p-3 pb-[max(.75rem,env(safe-area-inset-bottom))] backdrop-blur-sm sm:p-4"
         >
           <div className="flex items-end gap-3">
             <Textarea
@@ -400,14 +406,15 @@ export const AIChatSidePanel: React.FC<AIChatSidePanelProps> = ({
                   handleSendMessage(e);
                 }
               }}
-              placeholder="Ask me anything about your code, request changes, or generate new features..."
-              className="flex-1 min-h-[80px] resize-none bg-zinc-800/50 border-zinc-700 text-zinc-100 placeholder:text-zinc-500"
+              placeholder="Ask about your code or request a change..."
+              className="min-h-[64px] flex-1 resize-none bg-zinc-800/50 border-zinc-700 text-zinc-100 placeholder:text-zinc-500 sm:min-h-[80px]"
               disabled={isLoading}
             />
             <Button
               type="submit"
               disabled={!input.trim() || isLoading}
-              className="h-[80px] w-[80px] shrink-0"
+              className="h-16 w-14 shrink-0 sm:h-20 sm:w-20"
+              aria-label="Send message"
             >
               <Send className="h-5 w-5" />
             </Button>

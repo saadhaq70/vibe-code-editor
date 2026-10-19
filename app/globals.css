@@ -90,26 +90,23 @@
   }
 }
 
-/* FORCE FIX FOR SIDEBAR OVERLAP */
-@layer utilities {
-  /* Force the main content to have proper left margin */
-  .dashboard-main {
-    margin-left: 16rem !important;
-    width: calc(100% - 16rem) !important;
-  }
-  
-  /* Fix SidebarInset positioning for playground */
+.playground-content {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  min-height: 100dvh;
+}
+
+.playground-content [data-slot="sidebar-inset"] {
+  min-width: 0;
+  min-height: 100dvh;
+}
+
+@media (max-width: 767px) {
+  .playground-content,
   .playground-content [data-slot="sidebar-inset"] {
-    margin-left: 16rem !important;
-    width: calc(100% - 16rem) !important;
-  }
-  
-  /* Fix for mobile */
-  @media (max-width: 768px) {
-    .dashboard-main,
-    .playground-content [data-slot="sidebar-inset"] {
-      margin-left: 0 !important;
-      width: 100% !important;
-    }
+    min-height: 100dvh;
+    height: 100dvh;
+    overflow: hidden;
   }
 }

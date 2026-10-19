@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createGeminiModel, buildMessages, loadChatHistory, saveChatMessage } from "@/lib/langchain";
+import { auth } from "@/auth";
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -24,6 +26,7 @@ interface ChatRequest {
   projectContext: ProjectContext;
   fileContents: FileContent[];
   currentFile?: string;
+  sessionId?: string; // Optional session ID from frontend
 }
 
 interface CodeChange {
@@ -34,96 +37,6 @@ interface CodeChange {
   lineEnd?: number;
   oldCode?: string;
   newCode?: string;
-}
-
-async function callGeminiAPI(prompt: string): Promise<string> {
-  const apiKey = process.env.GEMINI_API_KEY;
-  
-  if (!apiKey) {
-    throw new Error("GEMINI_API_KEY is not configured");
-  }
-
-  // Try multiple model names in order of preference
-  const models = [
-    "gemini-2.5-flash",
-    "gemini-1.5-flash-latest",
-    "gemini-1.5-flash",
-    "gemini-1.5-pro-latest", 
-    "gemini-pro"
-  ];
-
-  let lastError: Error | null = null;
-
-  for (const model of models) {
-    try {
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            contents: [
-              {
-                parts: [
-                  {
-                    text: prompt,
-                  },
-                ],
-              },
-            ],
-            generationConfig: {
-              temperature: 0.7,
-              topK: 40,
-              topP: 0.95,
-              maxOutputTokens: 8192,
-            },
-            safetySettings: [
-              {
-                category: "HARM_CATEGORY_HARASSMENT",
-                threshold: "BLOCK_NONE",
-              },
-              {
-                category: "HARM_CATEGORY_HATE_SPEECH",
-                threshold: "BLOCK_NONE",
-              },
-            ],
-          }),
-        }
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        
-        if (!data.candidates || data.candidates.length === 0) {
-          throw new Error("No response from Gemini API");
-        }
-
-        return data.candidates[0].content.parts[0].text;
-      }
-
-      // If 404, try next model
-      if (response.status === 404) {
-        continue;
-      }
-
-      // Other errors, throw immediately
-      const error = await response.text();
-      throw new Error(`Gemini API error: ${response.status} - ${error}`);
-      
-    } catch (error) {
-      lastError = error instanceof Error ? error : new Error(String(error));
-      // If not a 404 or fetch error, throw immediately
-      const errStr = String(error);
-      if (!errStr.includes("404") && !errStr.includes("NOT_FOUND")) {
-        throw error;
-      }
-    }
-  }
-
-  // If all models failed, throw the last error
-  throw lastError || new Error("All Gemini models failed");
 }
 
 function buildProjectContextPrompt(
@@ -251,7 +164,7 @@ export async function POST(request: NextRequest) {
   try {
     const body: ChatRequest = await request.json();
     
-    const { message, chatHistory, projectContext, fileContents, currentFile } = body;
+    const { message, chatHistory, projectContext, fileContents, currentFile, sessionId: requestSessionId } = body;
 
     // Validate input
     if (!message || !projectContext) {
@@ -261,17 +174,58 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Get user ID from auth session or use 'anonymous'
+    const session = await auth();
+    const userId = session?.user?.id || 'anonymous';
+
+    // Get or generate session ID
+    const sessionId = requestSessionId || crypto.randomUUID();
+
+    // Load chat history from database
+    let dbHistory: ChatMessage[] = [];
+    try {
+      const rawHistory = await loadChatHistory(userId, sessionId, 10);
+      // Cast to ChatMessage[] since we know the DB stores 'user' or 'assistant' roles
+      dbHistory = rawHistory.filter(
+        msg => msg.role === 'user' || msg.role === 'assistant'
+      ) as ChatMessage[];
+    } catch (error) {
+      console.warn("Failed to load chat history:", error);
+      // Continue without history if DB fails
+    }
+
+    // Merge DB history with request history (prefer DB history)
+    const mergedHistory = dbHistory.length > 0 ? dbHistory : chatHistory;
+
     // Build comprehensive prompt with full project context
-    const prompt = buildProjectContextPrompt(
+    const projectContextPrompt = buildProjectContextPrompt(
       message,
       projectContext,
       fileContents,
-      chatHistory,
+      mergedHistory,
       currentFile
     );
 
-    // Call Gemini API
-    const aiResponse = await callGeminiAPI(prompt);
+    // Build messages using LangChain (merge system prompt with project context)
+    const langchainMessages = buildMessages(
+      projectContextPrompt,
+      [], // History is already included in the prompt
+      message // Pass the user message so Gemini has a non-empty HumanMessage
+    );
+
+    // Generate AI response using LangChain
+    const model = createGeminiModel('chat', { maxOutputTokens: 8192 });
+    const result = await model.invoke(langchainMessages);
+    const aiResponse = typeof result.content === 'string' ? result.content : String(result.content);
+
+    // Save user message and assistant response to database
+    try {
+      await saveChatMessage(userId, sessionId, 'user', message);
+      await saveChatMessage(userId, sessionId, 'assistant', aiResponse);
+    } catch (error) {
+      console.warn("Failed to save chat messages:", error);
+      // Continue even if save fails
+    }
 
     // Extract structured code changes from the ~~~json block
     const suggestedChanges = extractCodeChanges(aiResponse);
@@ -283,6 +237,7 @@ export async function POST(request: NextRequest) {
       response: humanResponse,
       suggestedChanges,
       timestamp: new Date().toISOString(),
+      sessionId, // Return session ID to frontend
     });
   } catch (error) {
     console.error("AI Chat API Error:", error);

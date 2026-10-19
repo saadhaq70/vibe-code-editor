@@ -25,9 +25,11 @@ import LoadingStep from "@/modules/playground/components/loader";
 import {PlaygroundEditor} from "@/modules/playground/components/playground-editor";
 import { TemplateFileTree } from "@/modules/playground/components/playground-explorer";
 import ToggleAI from "@/modules/playground/components/toggle-ai";
+import { AIChatSidePanel } from "@/modules/ai-chat/components/ai-chat-sidebarpanel";
 import { useAISuggestions } from "@/modules/playground/hooks/useAISuggestion";
 import { useFileExplorer } from "@/modules/playground/hooks/useFileExplorer";
 import { usePlayground } from "@/modules/playground/hooks/usePlayground";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { findFilePath } from "@/modules/playground/lib";
 import {
   TemplateFile,
@@ -45,6 +47,8 @@ import {
   X,
   Monitor,
   Terminal as TerminalIcon,
+  Code2,
+  MessageSquareText,
 } from "lucide-react";
 import { useParams } from "next/navigation";
 import React, {
@@ -59,6 +63,9 @@ const MainPlaygroundPage = () => {
   const { id } = useParams<{ id: string }>();
   const [showTerminal, setShowTerminal] = useState(true);
   const [showPreview, setShowPreview] = useState(true);
+  const [mobilePanel, setMobilePanel] = useState<"code" | "preview" | "terminal">("code");
+  const [isAIChatOpen, setIsAIChatOpen] = useState(false);
+  const isMobile = useIsMobile();
 
   const { playgroundData, templateData, isLoading, error, saveTemplateData } =
     usePlayground(id);
@@ -471,6 +478,20 @@ const MainPlaygroundPage = () => {
     );
   }
 
+  const editorSurface = (
+    <PlaygroundEditor
+      activeFile={activeFile}
+      content={activeFile?.content || ""}
+      onContentChange={(value) => activeFileId && updateFileContent(activeFileId, value)}
+      suggestion={aiSuggestions.suggestion}
+      suggestionLoading={aiSuggestions.isLoading}
+      suggestionPosition={aiSuggestions.position}
+      onAcceptSuggestion={(editor, monaco) => aiSuggestions.acceptSuggestion(editor, monaco)}
+      onRejectSuggestion={(editor) => aiSuggestions.rejectSuggestion(editor)}
+      onTriggerSuggestion={(type, editor) => aiSuggestions.fetchSuggestion(type, editor)}
+    />
+  );
+
   return (
     <TooltipProvider>
       <>
@@ -487,13 +508,13 @@ const MainPlaygroundPage = () => {
           onRenameFolder={wrappedHandleRenameFolder}
         />
         <SidebarInset>
-          <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+          <header className="flex min-h-14 shrink-0 items-center gap-2 border-b px-3 py-2 md:h-16 md:px-4">
             <SidebarTrigger className="-ml-1" />
             <Separator orientation="vertical" className="mr-2 h-4" />
 
-            <div className="flex flex-1 items-center gap-2">
-              <div className="flex flex-col flex-1">
-                <h1 className="text-sm font-medium">
+            <div className="flex min-w-0 flex-1 items-center gap-2">
+              <div className="flex min-w-0 flex-1 flex-col">
+                <h1 className="truncate text-sm font-medium">
                   {playgroundData?.title || "Code Playground"}
                 </h1>
                 <p className="text-xs text-muted-foreground">
@@ -502,7 +523,7 @@ const MainPlaygroundPage = () => {
                 </p>
               </div>
 
-              <div className="flex items-center gap-1">
+              <div className="flex shrink-0 items-center gap-1">
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
@@ -535,12 +556,24 @@ const MainPlaygroundPage = () => {
                 isEnabled={aiSuggestions.isEnabled}
                 onToggle={aiSuggestions.toggleEnabled}
                 suggestionLoading={aiSuggestions.isLoading}
-                templateData={templateData}
-                currentFile={activeFile ? `${activeFile.filename}.${activeFile.fileExtension}` : undefined}
-                onApplyModification={async (modification) => {
-                  await handleApplyModifications([modification]);
-                }}
+                onOpenChat={() => setIsAIChatOpen(true)}
                />
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      size="sm"
+                      variant={isAIChatOpen ? "secondary" : "outline"}
+                      className="h-8 gap-1.5 px-2.5"
+                      onClick={() => setIsAIChatOpen((open) => !open)}
+                      aria-label={isAIChatOpen ? "Close AI chat" : "Open AI chat"}
+                    >
+                      <MessageSquareText className="h-4 w-4" />
+                      <span className="hidden md:inline">Chat</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>{isAIChatOpen ? "Close AI chat" : "Open AI chat"}</TooltipContent>
+                </Tooltip>
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -571,25 +604,25 @@ const MainPlaygroundPage = () => {
             </div>
           </header>
 
-          <div className="h-[calc(100vh-4rem)]">
+          <div className={`min-h-0 flex-1 overflow-hidden transition-[margin] duration-300 ${isAIChatOpen ? "xl:mr-[440px]" : ""}`}>
             {openFiles.length > 0 ? (
-              <div className="h-full flex flex-col">
+              <div className="flex h-full min-h-0 flex-col">
                 <div className="border-b bg-muted/30">
                   <Tabs
                     value={activeFileId || ""}
                     onValueChange={setActiveFileId}
                   >
                     <div className="flex items-center justify-between px-4 py-2">
-                      <TabsList className="h-8 bg-transparent p-0">
+                      <TabsList className="h-8 max-w-full justify-start overflow-x-auto bg-transparent p-0">
                         {openFiles.map((file) => (
                           <TabsTrigger
                             key={file.id}
                             value={file.id}
-                            className="relative h-8 px-3 data-[state=active]:bg-background data-[state=active]:shadow-sm group"
+                            className="relative h-8 max-w-40 shrink-0 px-3 data-[state=active]:bg-background data-[state=active]:shadow-sm group"
                           >
                             <div className="flex items-center gap-2">
                               <FileText className="h-3 w-3" />
-                              <span>
+                              <span className="truncate">
                                 {file.filename}.{file.fileExtension}
                               </span>
                               {file.hasUnsavedChanges && (
@@ -622,29 +655,48 @@ const MainPlaygroundPage = () => {
                     </div>
                   </Tabs>
                 </div>
-                <div className="flex-1">
+                {isMobile ? (
+                  <div className="flex min-h-0 flex-1 flex-col">
+                    <div className="grid grid-cols-3 gap-1 border-b bg-muted/40 p-1.5">
+                      {([
+                        ["code", "Code", Code2],
+                        ["preview", "Preview", Monitor],
+                        ["terminal", "Terminal", TerminalIcon],
+                      ] as const).map(([panel, label, Icon]) => (
+                        <Button
+                          key={panel}
+                          size="sm"
+                          variant={mobilePanel === panel ? "secondary" : "ghost"}
+                          className="h-9 gap-1.5 text-xs"
+                          onClick={() => setMobilePanel(panel)}
+                        >
+                          <Icon className="h-4 w-4" />{label}
+                        </Button>
+                      ))}
+                    </div>
+                    <div className="min-h-0 flex-1">
+                      {mobilePanel === "code" ? editorSurface : (
+                        <WebContainerPreview
+                          templateData={templateData}
+                          instance={instance}
+                          writeFileSync={writeFileSync}
+                          isLoading={containerLoading}
+                          error={containerError}
+                          serverUrl={serverUrl!}
+                          forceResetup={false}
+                          showPreview={mobilePanel === "preview"}
+                          showTerminal={mobilePanel === "terminal"}
+                        />
+                      )}
+                    </div>
+                  </div>
+                ) : <div className="min-h-0 flex-1">
                   <ResizablePanelGroup
                     direction="horizontal"
                     className="h-full"
                   >
                     <ResizablePanel defaultSize={50} minSize={30}>
-                      <PlaygroundEditor
-                        activeFile={activeFile}
-                        content={activeFile?.content || ""}
-                        onContentChange={(value) => 
-                          activeFileId && updateFileContent(activeFileId , value)
-                        }
-                        suggestion={aiSuggestions.suggestion}
-                        suggestionLoading={aiSuggestions.isLoading}
-                        suggestionPosition={aiSuggestions.position}
-                        onAcceptSuggestion={(editor , monaco)=>aiSuggestions.acceptSuggestion(editor , monaco)}
-                        onRejectSuggestion={(editor) =>
-                          aiSuggestions.rejectSuggestion(editor)
-                        }
-                        onTriggerSuggestion={(type, editor) =>
-                          aiSuggestions.fetchSuggestion(type, editor)
-                        }
-                      />
+                      {editorSurface}
                     </ResizablePanel>
 
                     {(showPreview || showTerminal) && (
@@ -666,7 +718,7 @@ const MainPlaygroundPage = () => {
                       </>
                     )}
                   </ResizablePanelGroup>
-                </div>
+                </div>}
               </div>
             ) : (
               <div className="flex flex-col h-full items-center justify-center text-muted-foreground gap-4">
@@ -681,6 +733,15 @@ const MainPlaygroundPage = () => {
             )}
           </div>
         </SidebarInset>
+        <AIChatSidePanel
+          isOpen={isAIChatOpen}
+          onClose={() => setIsAIChatOpen(false)}
+          templateData={templateData}
+          currentFile={activeFile ? `${activeFile.filename}.${activeFile.fileExtension}` : undefined}
+          onApplyModification={async (modification) => {
+            await handleApplyModifications([modification]);
+          }}
+        />
       </>
     </TooltipProvider>
   );

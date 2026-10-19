@@ -103,6 +103,7 @@ model TemplateFile {
 model ChatMessage {
   id  String @id @default(cuid()) @map("_id")
   userId String 
+  sessionId String?
   role   String  // "user" or "assitant"
   content String
   createdAt DateTime  @default(now())
@@ -110,4 +111,5 @@ model ChatMessage {
   user  User @relation(fields: [userId] , references: [id] , onDelete: Cascade)
 
   @@index([userId])
+  @@index([userId, sessionId])
 } 

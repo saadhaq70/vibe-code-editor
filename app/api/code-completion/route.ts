@@ -5,6 +5,7 @@ import {
   findRelatedFiles,
   createCodebaseSummary,
 } from "@/lib/codebase-indexer";
+import { createGeminiModel } from "@/lib/langchain";
 
 interface CodeSuggestionRequest {
   fileContent: string;
@@ -234,104 +235,39 @@ Generate suggestion:`;
 }
 
 async function generateSuggestion(prompt: string): Promise<string> {
-  const apiKey = process.env.GEMINI_API_KEY;
-  
-  if (!apiKey) {
-    console.error("GEMINI_API_KEY is not configured");
-    throw new Error("GEMINI_API_KEY is not configured");
-  }
+  try {
+    console.log("🤖 Calling LangChain with Gemini for code completion...");
 
-  // Fallback model hierarchy: Try from best to worst
-  // Note: Only gemini-2.5-flash is currently available in v1beta API
-  const models = [
-    { name: "gemini-2.5-flash", label: "Gemini 2.5 Flash" },
-  ];
-
-  let lastError: Error | null = null;
-
-  // Try each model in sequence
-  for (const model of models) {
-    try {
-      console.log(`Attempting to call ${model.label}...`);
-
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model.name}:generateContent?key=${apiKey}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [
-              {
-                parts: [
-                  {
-                    text: prompt,
-                  },
-                ],
-              },
-            ],
-            generationConfig: {
-              temperature: 0.3,
-              topK: 40,
-              topP: 0.95,
-              maxOutputTokens: 500,
-            },
-          }),
+    // Create model with structured output
+    const baseModel = createGeminiModel('code', { temperature: 0.3, maxOutputTokens: 500 });
+    
+    // Define JSON schema for code suggestion (no Zod)
+    const schema = {
+      type: "object",
+      properties: {
+        suggestion: { 
+          type: "string",
+          description: "Code to insert at cursor position"
         }
-      );
+      },
+      required: ["suggestion"]
+    };
 
-      console.log(`${model.label} response status:`, response.status);
+    // Create structured output model
+    const structuredModel = baseModel.withStructuredOutput(schema);
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`${model.label} error:`, response.status, errorText);
-        
-        // Check if it's a quota/rate limit error
-        const isQuotaError = 
-          response.status === 429 || 
-          errorText.includes("quota") || 
-          errorText.includes("rate limit") ||
-          errorText.includes("RESOURCE_EXHAUSTED");
+    // Invoke the model
+    const result = await structuredModel.invoke(prompt) as { suggestion: string };
 
-        if (isQuotaError) {
-          console.log(`${model.label} quota exhausted, trying next model...`);
-          lastError = new Error(`${model.label} quota exceeded`);
-          continue; // Try next model
-        }
+    // Extract suggestion
+    const suggestion = result.suggestion || "";
 
-        // For other errors, throw immediately
-        throw new Error(`${model.label} error: ${response.status} - ${errorText}`);
-      }
-
-      const data = await response.json();
-      console.log(`${model.label} response:`, JSON.stringify(data).substring(0, 200));
-      
-      if (!data.candidates || data.candidates.length === 0) {
-        console.error(`No candidates in ${model.label} response`);
-        throw new Error(`No response from ${model.label}`);
-      }
-
-      let suggestion = data.candidates[0].content.parts[0].text;
-
-      // Clean up the suggestion
-      if (suggestion.includes("```")) {
-        const codeMatch = suggestion.match(/```[\w]*\n?([\s\S]*?)```/);
-        suggestion = codeMatch ? codeMatch[1].trim() : suggestion;
-      }
-
-      console.log(`✓ Successfully generated suggestion using ${model.label}`);
-      console.log("Generated suggestion:", suggestion.substring(0, 100) + "...");
-      return suggestion;
-
-    } catch (error) {
-      console.error(`${model.label} failed:`, error);
-      lastError = error instanceof Error ? error : new Error(String(error));
-      // Continue to next model
-    }
+    console.log("✅ Generated code completion using LangChain:", suggestion.substring(0, 100) + "...");
+    return suggestion;
+  } catch (error) {
+    console.error("Error generating code completion:", error);
+    return "// AI suggestion unavailable";
   }
-
-  // All models failed
-  console.error("All Gemini models failed:", lastError);
-  return "// AI suggestion unavailable - all models exhausted";
 }
 
 // Helper functions for code analysis

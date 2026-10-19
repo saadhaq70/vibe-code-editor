@@ -164,34 +164,34 @@ export default function ProjectTable({
 
   return (
     <>
-      <div className="border rounded-lg overflow-hidden">
+      <div className="w-full min-w-0 overflow-hidden rounded-lg border">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Project</TableHead>
-              <TableHead>Template</TableHead>
-              <TableHead>Created</TableHead>
-              <TableHead>User</TableHead>
+              <TableHead className="hidden sm:table-cell">Template</TableHead>
+              <TableHead className="hidden md:table-cell">Created</TableHead>
+              <TableHead className="hidden lg:table-cell">User</TableHead>
               <TableHead className="w-[50px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {projects.map((project) => (
               <TableRow key={project.id}>
-                <TableCell className="font-medium">
-                  <div className="flex flex-col">
+                <TableCell className="max-w-0 whitespace-normal font-medium">
+                  <div className="flex min-w-0 flex-col">
                     <Link
                       href={`/playground/${project.id}`}
-                      className="hover:underline"
+                      className="block max-w-full truncate hover:underline"
                     >
                       <span className="font-semibold">{project.title}</span>
                     </Link>
-                    <span className="text-sm text-gray-500 line-clamp-1">
+                    <span className="line-clamp-1 text-sm text-gray-500">
                       {project.description}
                     </span>
                   </div>
                 </TableCell>
-                <TableCell>
+                <TableCell className="hidden sm:table-cell">
                   <Badge
                     variant="outline"
                     className="bg-[#E93F3F15] text-[#E93F3F] border-[#E93F3F]"
@@ -199,12 +199,12 @@ export default function ProjectTable({
                     {project.template}
                   </Badge>
                 </TableCell>
-                <TableCell>
+                <TableCell className="hidden md:table-cell">
                   <span className="text-sm text-gray-500">
                     {format(new Date(project.createdAt), "MMM dd, yyyy")}
                   </span>
                 </TableCell>
-                <TableCell>
+                <TableCell className="hidden lg:table-cell">
                   <div className="flex items-center gap-2">
                     <div className="w-8 h-8 rounded-full overflow-hidden">
                       <Image

@@ -9,13 +9,13 @@ const Page = async () => {
   const playgrounds = await getAllPlaygroundForUser();
   console.log("Playgrounds:", playgrounds);
   return (
-    <div className="flex flex-col justify-start items-center min-h-screen mx-auto max-w-7xl px-4 py-10">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+    <div className="mx-auto flex min-h-[calc(100dvh-3rem)] w-full min-w-0 max-w-7xl flex-col items-center justify-start px-4 py-6 sm:py-10">
+      <div className="grid w-full min-w-0 grid-cols-1 gap-6 min-[1280px]:grid-cols-2">
         <AddNewButton />
         <AddRepo />
       </div>
 
-      <div className="mt-10 flex flex-col justify-center items-center w-full">
+      <div className="mt-8 flex w-full min-w-0 flex-col items-center justify-center sm:mt-10">
         {playgrounds && playgrounds.length === 0 ? (
           <EmptyState />
         ) : (
